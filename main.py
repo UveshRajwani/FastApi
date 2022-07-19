@@ -1,9 +1,9 @@
 from typing import Optional
 from random import randint
 from fastapi import FastAPI, Response, status, HTTPException
-from fastapi.params import Body
 import pymongo
 from pydantic import BaseModel
+from bson.json_util import dumps, loads
 
 app = FastAPI()
 uri = "mongodb://localhost:27017"
@@ -58,7 +58,8 @@ def create_post(new_post: Post):
 
 @app.get("/posts")
 def get_post():
-    return {"Posts": myPosts}
+    result = list(vg.find({},{"_id":0}))
+    return result
 
 
 @app.get("/posts/{id}")
