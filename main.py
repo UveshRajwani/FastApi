@@ -1,6 +1,7 @@
 from typing import Optional
 from random import randint
 from fastapi import FastAPI, Response, status, HTTPException
+from fastapi.params import Body
 
 from pydantic import BaseModel
 
@@ -23,7 +24,8 @@ def find_post(id: int):
         if post["id"] == id:
             return post
 
-def find_postIndex(id : int):
+
+def find_postIndex(id: int):
     for i, p in enumerate(myPosts):
         print(p)
         if p["id"] == id:
@@ -73,3 +75,13 @@ def delete_post(id: int):
     else:
         myPosts.pop(index)
         return {"message": f"successfully deleted your post with the id of {id}"}
+
+@app.put("/posts/{id}")
+def update_post(id: int, post:Post):
+    index = find_postIndex(id)
+    if not index:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid post id")
+    post_dict = post.dict()
+    post_dict['id'] = id
+    myPosts[index] = post_dict
+    return post_dict
