@@ -64,19 +64,18 @@ def get_Post_By_Id(id: int, response: Response):
 
 @app.delete("/posts/{id}")
 def delete_post(id: int):
-    index = find_postIndex(id)
-    print(index)
-    if not index:
+    post = find_post(id)
+    if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid post id")
     else:
-        myPosts.pop(index)
+        vg.delete_one({"id":id})
         return {"message": f"successfully deleted your post with the id of {id}"}
 
 
 @app.put("/posts/{id}")
 def update_post(id: int, post: Post):
-    index = find_postIndex(id)
-    if not index:
+    post = find_post(id)
+    if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid post id")
     post_dict = post.dict()
     post_dict['id'] = id
