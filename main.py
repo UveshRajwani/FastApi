@@ -11,6 +11,7 @@ client = pymongo.MongoClient(uri)
 db = client.fastapi
 vg = db.posts
 
+
 class Post(BaseModel):
     title: str
     content: str
@@ -23,9 +24,11 @@ myPosts = [{'id': 815, 'title': 'Demo Post', 'content': 'Demo Content', 'publish
 
 
 def find_post(id: int):
-    for post in myPosts:
-        if post["id"] == id:
-            return post
+    # for post in myPosts:
+    #     if post["id"] == id:
+    #         return post
+    result = list(vg.find({"id": id}, {"_id": 0}))
+    return result
 
 
 def find_postIndex(id: int):
@@ -49,16 +52,14 @@ async def say_hello(name: str):
 def create_post(new_post: Post):
     post_dict = new_post.dict()
     post_dict['id'] = randint(0, 999)
-    myPosts.append(post_dict)
     print(post_dict['id'])
-    print(myPosts)
     insert_result = vg.insert_one(post_dict)
     return {"new_post": f"title {new_post.title}, content: {new_post.content} "}
 
 
 @app.get("/posts")
 def get_post():
-    result = list(vg.find({},{"_id":0}))
+    result = list(vg.find({}, {"_id": 0}))
     return result
 
 
@@ -81,8 +82,9 @@ def delete_post(id: int):
         myPosts.pop(index)
         return {"message": f"successfully deleted your post with the id of {id}"}
 
+
 @app.put("/posts/{id}")
-def update_post(id: int, post:Post):
+def update_post(id: int, post: Post):
     index = find_postIndex(id)
     if not index:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid post id")
