@@ -24,8 +24,11 @@ myPosts = [{'id': 815, 'title': 'Demo Post', 'content': 'Demo Content', 'publish
 
 
 def find_post(id: int):
-    result = list(vg.find({"id": id}, {"_id": 0}))
-    return result[0]
+    try:
+        result = list(vg.find({"id": id}, {"_id": 0}))
+        return result[0]
+    except IndexError:
+        return None
 
 
 @app.get("/")
@@ -73,11 +76,12 @@ def delete_post(id: int):
 
 
 @app.put("/posts/{id}")
-def update_post(id: int, post: Post):
+def update_post(id: int, new_post: Post):
     post = find_post(id)
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid post id")
-    post_dict = post.dict()
+    post_dict = dict(new_post)
     post_dict['id'] = id
-    myPosts[index] = post_dict
-    return post_dict
+    delete_post(id)
+    vg.insert_one(post_dict)
+    return post
