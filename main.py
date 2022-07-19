@@ -28,13 +28,6 @@ def find_post(id: int):
     return result[0]
 
 
-def find_postIndex(id: int):
-    for i, p in enumerate(myPosts):
-        print(p)
-        if p["id"] == id:
-            return i
-
-
 @app.get("/")
 async def root():
     return {"message": "Welcome to my api"}
