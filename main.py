@@ -58,7 +58,7 @@ def get_post():
 
 
 @app.get("/posts/{id}")
-def get_PostById(id: int, response: Response):
+def get_Post_By_Id(id: int, response: Response):
     post = find_post(id)
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid post id")
