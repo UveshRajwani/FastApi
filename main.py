@@ -2,11 +2,14 @@ from typing import Optional
 from random import randint
 from fastapi import FastAPI, Response, status, HTTPException
 from fastapi.params import Body
-
+import pymongo
 from pydantic import BaseModel
 
 app = FastAPI()
-
+uri = "mongodb://localhost:27017"
+client = pymongo.MongoClient(uri)
+db = client.fastapi
+vg = db.posts
 
 class Post(BaseModel):
     title: str
@@ -49,6 +52,7 @@ def create_post(new_post: Post):
     myPosts.append(post_dict)
     print(post_dict['id'])
     print(myPosts)
+    insert_result = vg.insert_one(post_dict)
     return {"new_post": f"title {new_post.title}, content: {new_post.content} "}
 
 
