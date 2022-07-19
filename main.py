@@ -29,6 +29,7 @@ def find_postIndex(id : int):
         if p["id"] == id:
             return i
 
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to my api"}
@@ -66,8 +67,9 @@ def get_PostById(id: int, response: Response):
 @app.delete("/posts/{id}")
 def delete_post(id: int):
     index = find_postIndex(id)
-    myPosts.pop(index)
+    print(index)
     if not index:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid post id")
     else:
+        myPosts.pop(index)
         return {"message": f"successfully deleted your post with the id of {id}"}
