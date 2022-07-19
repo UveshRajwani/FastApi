@@ -24,11 +24,8 @@ myPosts = [{'id': 815, 'title': 'Demo Post', 'content': 'Demo Content', 'publish
 
 
 def find_post(id: int):
-    # for post in myPosts:
-    #     if post["id"] == id:
-    #         return post
     result = list(vg.find({"id": id}, {"_id": 0}))
-    return result
+    return result[0]
 
 
 def find_postIndex(id: int):
