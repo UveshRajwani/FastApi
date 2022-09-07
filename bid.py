@@ -1,9 +1,9 @@
+from typing import List
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from time import sleep
 from pydantic import BaseModel
-from typing import Optional
-from typing import List
+
 app = FastAPI()
 
 html = """
@@ -42,12 +42,30 @@ html = """
     </body>
 </html>
 """
+auction = []
 
 
-class WebUser():
+class WebUser:
     def __init__(self, userid: int, websocket: WebSocket):
         self.userid = userid
         self.websocket = websocket
+
+
+class Player(BaseModel):
+    name: str
+    image: str
+    start: int
+
+
+class PlayersModel(BaseModel):
+    players_model: List[Player]
+
+
+# class Player:
+#     def __init__(self, name: str, image: str, price: int):
+#         self.name = name
+#         self.image = image
+#         self.price = price
 
 
 class ConnectionManager:
@@ -66,7 +84,7 @@ class ConnectionManager:
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
 
-    async def broadcast(self, message: str,):
+    async def broadcast(self, message: str, ):
         for connection in self.active_connections:
             await connection.websocket.send_text(message)
             # if connection != websocket:
@@ -81,6 +99,14 @@ async def get():
     return HTMLResponse(html)
 
 
+@app.post("/add-auction")
+def add_players(players_model: PlayersModel):
+    players_dict = players_model.dict()
+    for player in players_dict['players_model']:
+        auction.append(player)
+    return auction
+
+
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
@@ -88,10 +114,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     manager.add_to_active_list(user)
     try:
         while True:
-
             data = await websocket.receive_text()
             print(manager.active_connections)
-            print(data, type(data))
+            print(data, type(data), int(data))
             await manager.broadcast(f"Client #{client_id} says: {data}")
     except WebSocketDisconnect:
         manager.disconnect(user)
