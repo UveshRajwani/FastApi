@@ -1,10 +1,19 @@
+import json.decoder
 from typing import List
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 html = """
 <!DOCTYPE html>
@@ -16,7 +25,7 @@ html = """
         <h1>WebSocket Chat</h1>
         <h2>Your ID: <span id="ws-id"></span></h2>
         <form action="" onsubmit="sendMessage(event)">
-            <input type="text" id="messageText" autocomplete="off"/>
+            <input type="json" id="messageText" autocomplete="off"/>
             <button>Send</button>
         </form>
         <ul id='messages'>
@@ -24,7 +33,7 @@ html = """
         <script>
             var client_id = Date.now()
             document.querySelector("#ws-id").textContent = client_id;
-            var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+            var ws = new WebSocket(`ws://localhost:8000/ws/hello`);
             ws.onmessage = function(event) {
                 var messages = document.getElementById('messages')
                 var message = document.createElement('li')
@@ -43,10 +52,12 @@ html = """
 </html>
 """
 auction = []
+types_of_events = ["new_bid"]
+active_connections = []
 
 
 class WebUser:
-    def __init__(self, userid: int, websocket: WebSocket):
+    def __init__(self, userid: str, websocket: WebSocket):
         self.userid = userid
         self.websocket = websocket
 
@@ -59,6 +70,13 @@ class Player(BaseModel):
 
 class PlayersModel(BaseModel):
     players_model: List[Player]
+
+
+class MentorModel(WebUser):
+    def __init__(self, userid: str, websocket: WebSocket, team: List, money: int):
+        WebUser.__init__(self, userid, websocket)
+        self.team = team
+        self.money = money
 
 
 # class Player:
@@ -94,30 +112,62 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
+class Events:
+    class_return: str
+
+    @classmethod
+    def event(cls, func, *args, **kwargs):
+        getattr(cls, func)(*args, **kwargs)
+        return cls.class_return
+
+    @classmethod
+    def new_bid(cls, **kwargs):
+        my_kwargs = [key for key in kwargs.items()]
+        cls.class_return = f"done it ayuu nobb and kw: {my_kwargs}"
+
+
+event = Events()
+
+
 @app.get("/")
 async def get():
     return HTMLResponse(html)
 
 
 @app.post("/add-auction")
+@app.options("/add-auction")
 def add_players(players_model: PlayersModel):
     players_dict = players_model.dict()
     for player in players_dict['players_model']:
         auction.append(player)
+    return {"done": "done"}
+
+
+@app.get("/get-auction")
+def add_auction():
     return auction
 
 
 @app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
+async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await manager.connect(websocket)
-    user = WebUser(userid=client_id, websocket=websocket)
+    if client_id == "view-only":
+        user = WebUser(userid=client_id, websocket=websocket)
+    else:
+        user = MentorModel(userid=client_id, websocket=websocket, team=[], money=60)
     manager.add_to_active_list(user)
     try:
         while True:
-            data = await websocket.receive_text()
-            print(manager.active_connections)
-            print(data, type(data), int(data))
-            await manager.broadcast(f"Client #{client_id} says: {data}")
+
+            try:
+                data = await websocket.receive_json()
+                print(data["para"])
+                if data["event"] in types_of_events:
+                    res = event.event(data["event"], **data["para"])
+                await manager.broadcast(f"Client #{client_id} says: {res}")
+            except json.decoder.JSONDecodeError:
+                pass
+
     except WebSocketDisconnect:
         manager.disconnect(user)
         await manager.broadcast(f"Client #{client_id} left the chat")
