@@ -4,7 +4,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-
+from enum import Enum
+import json
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -52,8 +53,7 @@ html = """
 """
 auction = []
 player_unsold = []
-player_sold = []
-types_of_events = ["new_bid", "player_unsold", "player_sold", "start_auction", "next_player", "show_teams", "end_auction"]
+types_of_events = ["new_bid", "player_unsold", "player_sold", "start_auction", "next_player", "show_teams"]
 
 
 class WebUser:
@@ -65,7 +65,7 @@ class WebUser:
 class Player(BaseModel):
     name: str
     image: str
-    price: float
+    price: int
     bid_by: Optional[str] = None
     sold_to: Optional[str] = None
 
@@ -88,37 +88,39 @@ class MentorModel(WebUser):
 #         self.price = price
 
 
-async def send_message_to_view_only(message: json, websocket: WebSocket):
-    await websocket.send_json(data=message)
-
-
 class ConnectionManager:
     def __init__(self):
+        self.view_only_connection = None
         self.active_connections = []
-        self.view_only_connection: WebUser
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
 
     def disconnect(self, user: WebUser):
-        if user.userid == "view-only":
-            self.view_only_connection: Optional[WebUser] = None
-        else:
-            self.active_connections.remove(user)
+        self.active_connections.remove(user)
 
     def add_to_active_list(self, user: WebUser):
         self.active_connections.append(user)
 
+    def add_view_only_websocket(self, user: WebUser):
+        self.view_only_connection = user
+
     async def send_personal_message(self, message: json, websocket: WebSocket):
-        print("hello")
         await websocket.send_json(data=message)
 
     async def broadcast(self, message: json, ):
         for connection in self.active_connections:
             await connection.websocket.send_json(data=message)
 
-            # if connection != websocket
-            #     await connection.send_text(message)
+    async def data_sender(self, message: json, receivers):
+        print(message, receivers)
+        if receivers == "view_only":
+            await self.send_personal_message(message, self.view_only_connection.websocket)
+        elif receivers == "mentors_only":
+            await self.broadcast(message)
+        else:
+            await self.send_personal_message(message, self.view_only_connection.websocket)
+            await self.broadcast(message)
 
 
 manager = ConnectionManager()
@@ -135,26 +137,56 @@ class Events:
         return cls.class_return
 
     @classmethod
-    def new_bid(cls, **kwargs):
+    def start_auction(cls):
         cls.current_player = auction[cls.current_index]
+        cls.class_return = {"message": cls.current_player, "receiver": "view_only"}
+
+    @classmethod
+    def player_unsold(cls):
+        player_unsold.append(cls.current_player)
+        cls.next_player()
+
+    @classmethod
+    def new_bid(cls, **kwargs):
         cls.current_player['price'] += kwargs["price"]
         cls.current_player["bid_by"] = kwargs["bid_by"]
-        cls.class_return = cls.current_player
+        cls.class_return = {"message": cls.current_player, "receiver": "view_only"}
+
+    @classmethod
+    def player_sold(cls, **kwargs):
+        cls.current_player['sold_to'] = kwargs["sold_to"]
+        m = ""
+        for mentor in manager.active_connections:
+            if mentor.userid == kwargs["sold_to"]:
+                manager.disconnect(mentor)
+                mentor.team.append(cls.current_player)
+                mentor.money -= cls.current_player["price"]
+                m = mentor
+            manager.add_to_active_list(m)
+        cls.class_return = {"message": {"player": cls.current_player}, "receiver": "view_only"}
+        cls.next_player()
 
     @classmethod
     def next_player(cls, **kwargs):
         if cls.current_index < len(auction) - 1:
             cls.current_index += 1
             cls.current_player = auction[cls.current_index]
-            cls.class_return = cls.current_player
+            cls.class_return = {"message": cls.current_player, "receiver": "view_only"}
         else:
             cls.end_auction()
 
     @classmethod
     def end_auction(cls):
-        cls.class_return = {"end_auction": True}
+        cls.class_return = {"message": "end_auction", "receiver": "all"}
 
-
+    @classmethod
+    def show_teams(cls):
+        all_teams = []
+        for mentor in manager.active_connections:
+            all_teams.append(f"{mentor.userid}:{mentor.team}")
+        all_teams.append(f"unSold:{player_unsold}")
+        jsonStr = json.dumps(all_teams)
+        cls.class_return = {"message": all_teams, "receiver": "all"}
 
 
 event = Events()
@@ -185,20 +217,22 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     if client_id == "view-only":
         user = WebUser(userid=client_id, websocket=websocket)
         print("here")
-        manager.view_only_connections = user
+        manager.add_view_only_websocket(user)
     else:
-        user = MentorModel(userid=client_id, websocket=websocket, team=[], money=60)
+        user = MentorModel(userid=client_id, websocket=websocket, team=[], money=600)
         manager.add_to_active_list(user)
     try:
         while True:
 
             try:
                 data = await websocket.receive_json()
-                print(data["para"])
+                print(data)
                 if data["event"] in types_of_events:
-                    res = event.event(data["event"], **data["para"])
-                    await send_message_to_view_only(websocket=manager.view_only_connections.websocket, message=res)
-                    print(len(auction))
+                    try:
+                        res = event.event(data["event"], **data["para"])
+                    except KeyError:
+                        res = event.event(data["event"])
+                    await manager.data_sender(message=res["message"], receivers=res["receiver"])
             except json.decoder.JSONDecodeError:
                 pass
 
