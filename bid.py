@@ -4,8 +4,11 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from enum import Enum
+import random
+import os
+from fastapi.responses import FileResponse
 import json
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -53,7 +56,7 @@ html = """
 """
 auction = []
 player_unsold = []
-types_of_events = ["new_bid", "player_unsold", "player_sold", "start_auction", "next_player", "show_teams"]
+types_of_events = ["new_bid", "player_unsold", "player_sold", "start_auction", "next_player", "show_teams", "update_money"]
 
 
 class WebUser:
@@ -72,6 +75,10 @@ class Player(BaseModel):
 
 class PlayersModel(BaseModel):
     players_model: List[Player]
+
+
+class post_mentor(BaseModel):
+    name: str
 
 
 class MentorModel(WebUser):
@@ -97,7 +104,10 @@ class ConnectionManager:
         await websocket.accept()
 
     def disconnect(self, user: WebUser):
-        self.active_connections.remove(user)
+        if user.userid == "view-only":
+            self.view_only_connection = None
+        else:
+            self.active_connections.remove(user)
 
     def add_to_active_list(self, user: WebUser):
         self.active_connections.append(user)
@@ -118,10 +128,15 @@ class ConnectionManager:
             await self.send_personal_message(message, self.view_only_connection.websocket)
         elif receivers == "mentors_only":
             await self.broadcast(message)
-        else:
+
+        elif receivers == "all":
             await self.send_personal_message(message, self.view_only_connection.websocket)
             await self.broadcast(message)
-
+        else:
+            for m in manager.active_connections:
+                if receivers == m.userid:
+                    print("kal")
+                    await self.send_personal_message(message, m.websocket)
 
 manager = ConnectionManager()
 
@@ -130,6 +145,7 @@ class Events:
     class_return: json
     current_index: int = 0
     current_player: Player
+    auction_started = False
 
     @classmethod
     def event(cls, func, *args, **kwargs):
@@ -138,6 +154,8 @@ class Events:
 
     @classmethod
     def start_auction(cls):
+        cls.auction_started = True
+        print(cls.auction_started)
         cls.current_player = auction[cls.current_index]
         cls.class_return = {"message": cls.current_player, "receiver": "view_only"}
 
@@ -145,7 +163,13 @@ class Events:
     def player_unsold(cls):
         player_unsold.append(cls.current_player)
         cls.next_player()
-
+    @classmethod
+    def update_money(cls, **kwargs):
+        for mentor in manager.active_connections:
+            money = 0
+            if mentor.userid == kwargs["mentor"]:
+                money = mentor.money
+            cls.class_return = {"message": {"money": money}, "receiver": kwargs["mentor"]}
     @classmethod
     def new_bid(cls, **kwargs):
         cls.current_player['price'] += kwargs["price"]
@@ -154,6 +178,7 @@ class Events:
 
     @classmethod
     def player_sold(cls, **kwargs):
+        print("i was called")
         cls.current_player['sold_to'] = kwargs["sold_to"]
         m = ""
         for mentor in manager.active_connections:
@@ -161,9 +186,9 @@ class Events:
                 manager.disconnect(mentor)
                 mentor.team.append(cls.current_player)
                 mentor.money -= cls.current_player["price"]
+                print(f"team : {mentor.team}")
                 m = mentor
-            manager.add_to_active_list(m)
-        cls.class_return = {"message": {"player": cls.current_player}, "receiver": "view_only"}
+        manager.add_to_active_list(m)
         cls.next_player()
 
     @classmethod
@@ -177,28 +202,63 @@ class Events:
 
     @classmethod
     def end_auction(cls):
-        cls.class_return = {"message": "end_auction", "receiver": "all"}
+        cls.class_return = {"message": {"event":"end_auction"}, "receiver": "all"}
 
     @classmethod
     def show_teams(cls):
         all_teams = []
         for mentor in manager.active_connections:
-            all_teams.append(f"{mentor.userid}:{mentor.team}")
-        all_teams.append(f"unSold:{player_unsold}")
-        jsonStr = json.dumps(all_teams)
-        cls.class_return = {"message": all_teams, "receiver": "all"}
+            team = {mentor.userid: mentor.team}
+            all_teams.append(team)
+        unsold = {"unsold": player_unsold}
+        all_teams.append(unsold)
+        cls.class_return = {"message": {"teams": all_teams}, "receiver": "view_only"}
 
 
 event = Events()
+player_unsold_sounds = ["thukra.mp3", "bewafa.mp3"]
+player_sold_sounds = ["jio.mp3", "papa.mp3"]
 
 
 @app.get("/")
 async def get():
     return HTMLResponse(html)
 
+@app.get("/show_teams")
+def show_teams():
+    all_teams = []
+    for mentor in manager.active_connections:
+            team = {mentor.userid: mentor.team}
+            all_teams.append(team)
+    unsold = {"unsold": player_unsold}
+    all_teams.append(unsold)
+    return {"teams": all_teams}
+@app.get("/download/{event_name}")
+def download_file(event_name: str):
+    if event_name == "player_unsold":
+        name_file = random.choice(seq=player_unsold_sounds)
+    else:
+        name_file = random.choice(seq=player_sold_sounds)
+    print(name_file)
+    if os.path.isfile(name_file):
+        print("hello")
+        return FileResponse(name_file)
+    # return FileResponse(path=name_file, media_type='application/octet-stream', filename=name_file)
+
+
+@app.post("/add-mentor")
+async def add_mentor(name: post_mentor):
+    message = name.dict()
+    print(name.dict())
+    await manager.data_sender(message=name.dict(), receivers="view_only")
+
+
+@app.get("/start-aution")
+async def start_auction():
+    await manager.data_sender(message={"event": "start_auction"}, receivers="mentors_only")
+
 
 @app.post("/add-auction")
-# @app.options("/add-auction")
 def add_players(players_model: PlayersModel):
     players_dict = players_model.dict()
     for player in players_dict['players_model']:
@@ -221,6 +281,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     else:
         user = MentorModel(userid=client_id, websocket=websocket, team=[], money=600)
         manager.add_to_active_list(user)
+        print(client_id)
+        if not event.auction_started:
+            print("helloo")
+            await manager.data_sender(message={"name": client_id}, receivers="view_only")
+        else:
+            await manager.send_personal_message(message={"money": user.money}, websocket=websocket)
     try:
         while True:
 
@@ -237,5 +303,5 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 pass
 
     except WebSocketDisconnect:
+        print(f"WebSocketDisconnect : {user.userid}")
         manager.disconnect(user)
-        await manager.broadcast(f"Client #{client_id} left the chat")
