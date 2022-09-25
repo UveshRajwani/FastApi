@@ -1,0 +1,312 @@
+{
+    "players_model": [
+        {
+            "name": "Atharva Dalal",
+            "image": "https://i.postimg.cc/sgCVfB6Q/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Dev Sheth",
+            "image": "https://i.postimg.cc/hPWjv3ht/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Parshvi Sheth",
+            "image": "https://i.postimg.cc/1R6mkcMh/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Tatsat Mashruwala",
+            "image": "https://i.postimg.cc/3RGhHYXC/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Aahna Shah",
+            "image": "https://i.postimg.cc/vHhsyPVj/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Vedant Dhameliya",
+            "image": "https://i.postimg.cc/hvPwKSgJ/image.png",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Surya Aggarwal",
+            "image": "https://i.postimg.cc/Gt5MrGqN/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Arnee Parmar",
+            "image": "https://i.postimg.cc/C5q8B8w9/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Ananya Jain",
+            "image": "https://i.postimg.cc/N0K0nh5B/image.png",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Angel Shingala",
+            "image": "https://i.postimg.cc/YSDW4fmq/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Pal Patel",
+            "image": "https://i.postimg.cc/WtckM43z/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Anshul Agarwal",
+            "image": "https://i.postimg.cc/9fkDXmvD/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Sameer Bajari",
+            "image": "https://i.postimg.cc/5tR9VsZ1/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Aarohi Marfatia",
+            "image": "https://i.postimg.cc/mgvxTKmb/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Divisha Mittal",
+            "image": "https://i.postimg.cc/Gh4S9q89/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Aaditya Tibrewal",
+            "image": "https://i.postimg.cc/PqX7fhmn/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Kinkinie Dutta",
+            "image": "https://i.postimg.cc/mgwd5qKX/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Arham Bothra",
+            "image": "https://i.postimg.cc/43x8kPgJ/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Dax Patel",
+            "image": "https://i.postimg.cc/1XQwPRqp/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Prisha Nangalia",
+            "image": "https://i.postimg.cc/VLznV61w/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Hirva Patel",
+            "image": "https://i.postimg.cc/PqDCxshK/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Arhat Shah",
+            "image": "https://i.postimg.cc/Zq6DLn4N/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Arhat Shah",
+            "image": "https://i.postimg.cc/vZVPQT1K/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Jaivee Kagalwala",
+            "image": "https://i.postimg.cc/vZVPQT1K/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Adeesh Daftari",
+            "image": "https://i.postimg.cc/KvdNsb9D/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Damian Joshi",
+            "image": "https://i.postimg.cc/fRncfKLH/image.png",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Samyak Jain",
+            "image": "https://i.postimg.cc/DZMsJQHP/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Shloka Masrani",
+            "image": "https://i.postimg.cc/fWVqH8zZ/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Harshvardhan Shah",
+            "image": "https://i.postimg.cc/T25Qjh03/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Dwitee Gupta",
+            "image": "https://i.postimg.cc/DyqgDDtV/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Malay Patel",
+            "image": "https://i.postimg.cc/LXMngC8S/image.png",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Vivaana Bhakta",
+            "image": "https://i.postimg.cc/wBPL3cSc/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Heer Desai",
+            "image": "https://i.postimg.cc/fy7924kB/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Vedika Singapuri",
+            "image": "https://i.postimg.cc/TY7wRY8n/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Vedant Naik",
+            "image": "https://i.postimg.cc/L8gH2t3M/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Daksh Rathi",
+            "image": "https://i.postimg.cc/gjhf1sPM/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Harshil Jain",
+            "image": "https://i.postimg.cc/3wCQxnyz/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Uttam Jain",
+            "image": "https://i.postimg.cc/MT20dmdZ/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Aarav Bhansali",
+            "image": "https://i.postimg.cc/N0K0nh5B/image.png",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Yagya Bisani",
+            "image": "https://i.postimg.cc/Pf8JtkX7/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Neishca Dhamanwala",
+            "image": "https://i.postimg.cc/jqh64NNK/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Shees Bandookwala",
+            "image": "https://i.postimg.cc/Bvwk6kSY/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Nischal Jogani",
+            "image": "https://i.postimg.cc/vB2YG3kb/image.jpg",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        },
+        {
+            "name": "Karma Boghra",
+            "image": "https://i.postimg.cc/N0K0nh5B/image.png",
+            "price": 10,
+            "bid_by": null,
+            "sold_to": null
+        }
+    ]
+}
